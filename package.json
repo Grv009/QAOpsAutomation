@@ -13,6 +13,7 @@
     "@azure/playwright": "^1.1.6",
     "@playwright/test": "^1.61.1",
     "@types/node": "^25.6.0",
+    "allure-commandline": "^2.43.0",
     "allure-playwright": "^3.10.2"
   },
   "dependencies": {
