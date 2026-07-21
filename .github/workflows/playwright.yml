@@ -30,18 +30,18 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Run Playwright tests
-        if: always()
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ vars.PLAYWRIGHT_SERVICE_URL }}
         run: npx playwright test --config=playwright.service.config.js --workers=20
 
-      - name: Install Allure CLI
-        if: always()
-        run: npm install -g allure-commandline
-
       - name: Generate Allure Report
         if: always()
-        run: allure generate allure-results --clean -o allure-report
+        run: |
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
+            npx @shelex/allure-commandline generate allure-results --clean -o allure-report
+          else
+            echo "No allure-results directory or it is empty. Skipping report generation."
+          fi
 
       - name: Upload Playwright Report
         if: always()
