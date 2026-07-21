@@ -30,7 +30,8 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Run Playwright tests
-        if: always()
+        id: playwright-tests
+        continue-on-error: true
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ vars.PLAYWRIGHT_SERVICE_URL }}
         run: npx playwright test --config=playwright.service.config.js --workers=20
@@ -41,16 +42,8 @@ jobs:
           if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
             npx allure generate allure-results --clean -o allure-report
           else
-            echo "No allure-results directory or it is empty. Skipping report generation."
+            echo "No allure-results directory or it is empty."
           fi
-
-      - name: Upload Playwright Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
 
       - name: Upload Allure Report
         if: always()
@@ -58,4 +51,18 @@ jobs:
         with:
           name: allure-report
           path: allure-report/
+          if-no-files-found: warn
           retention-days: 30
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Fail workflow if tests failed
+        if: steps.playwright-tests.outcome == 'failure'
+        run: exit 1
